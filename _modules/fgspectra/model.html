@@ -1,0 +1,335 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>fgspectra.model &mdash; fgspectra  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/language_data.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> fgspectra
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">fgspectra</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">fgspectra</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>fgspectra.model</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for fgspectra.model</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
+<span class="kn">import</span> <span class="nn">types</span>
+<span class="kn">import</span> <span class="nn">inspect</span>
+<span class="kn">import</span> <span class="nn">yaml</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<div class="viewcode-block" id="Model"><a class="viewcode-back" href="../../fgspectra.html#fgspectra.model.Model">[docs]</a><span class="k">class</span> <span class="nc">Model</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Abstract class for model definition</span>
+
+<span class="sd">    A model is a class that has one purpose: evaluating the model. What</span>
+<span class="sd">    evaluation means is defined by the `eval` method that any child class has to</span>
+<span class="sd">    override.</span>
+
+<span class="sd">    If the `eval` method of a hypotetical ``Child`` class calls the `eval`</span>
+<span class="sd">    method of other `Model`s, it is likely that ``Child`` has also to override</span>
+<span class="sd">    `set_defaults`, `defaults` and `_get_repr`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; You can set defaults at construction time &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_defaults</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Model.set_defaults"><a class="viewcode-back" href="../../fgspectra.html#fgspectra.model.Model.set_defaults">[docs]</a>    <span class="k">def</span> <span class="nf">set_defaults</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Change the defaults of the evaluation</span>
+
+<span class="sd">        Call ``set_defaults`` with the same arguments (or a subset) of ``eval``</span>
+<span class="sd">        (or ``__call__``).</span>
+<span class="sd">        This will change the default value of those arguments in ``eval``. If</span>
+<span class="sd">        `kwargs` has keys that are not arguments of `eval`, these keys are</span>
+<span class="sd">        ignored.</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+
+<span class="sd">        &gt;&gt;&gt; class PrintABC(Model):</span>
+<span class="sd">        ...     def eval(self, a=1, b=2, c=3):</span>
+<span class="sd">        ...         print(a, b, c)</span>
+<span class="sd">        ...</span>
+<span class="sd">        &gt;&gt;&gt; print_abc = PrintABC()</span>
+<span class="sd">        &gt;&gt;&gt; print_abc.eval()</span>
+<span class="sd">        1 2 3</span>
+<span class="sd">        &gt;&gt;&gt; print_ab10c = PrintABC()</span>
+<span class="sd">        &gt;&gt;&gt; print_ab10c.set_defaults(b=10)</span>
+<span class="sd">        &gt;&gt;&gt; print_ab10c.eval()  # The default of b has changed</span>
+<span class="sd">        1 10 3</span>
+<span class="sd">        &gt;&gt;&gt; print_abc.eval()  # Without affecting other instances</span>
+<span class="sd">        1 2 3</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># This is a dirty business, and has limitations. The most important</span>
+        <span class="c1"># known one is that it breaks with decorated eval</span>
+        <span class="c1"># To change the default values of the eval method</span>
+        <span class="c1"># we have to bind a new method to the instance</span>
+        <span class="c1"># (not the class, otherwise we change the defaults of all the instances)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">kwargs</span><span class="p">:</span>  <span class="c1"># No default to be replaced</span>
+            <span class="k">return</span>
+
+        <span class="c1"># Make a deep copy of the eval function, assuming no variadic arguments</span>
+        <span class="n">func</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">eval</span><span class="o">.</span><span class="vm">__func__</span>
+
+        <span class="n">new_func</span> <span class="o">=</span> <span class="n">types</span><span class="o">.</span><span class="n">FunctionType</span><span class="p">(</span>
+            <span class="n">func</span><span class="o">.</span><span class="vm">__code__</span><span class="p">,</span> <span class="n">func</span><span class="o">.</span><span class="vm">__globals__</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">func</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span>
+            <span class="n">argdefs</span><span class="o">=</span><span class="n">func</span><span class="o">.</span><span class="vm">__defaults__</span><span class="p">,</span> <span class="n">closure</span><span class="o">=</span><span class="n">func</span><span class="o">.</span><span class="vm">__closure__</span><span class="p">)</span>
+
+        <span class="c1"># Build the defaults from scratch, assuming no positional argument</span>
+        <span class="c1"># Update the defaults that have a corresponding key in kwargs</span>
+        <span class="c1"># Note that if kwargs has keys that are not in the arguments,</span>
+        <span class="c1"># these keys are ignored</span>
+        <span class="n">fas</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">getfullargspec</span><span class="p">(</span><span class="n">new_func</span><span class="p">)</span>
+        <span class="n">defaults</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">arg</span><span class="p">,</span> <span class="n">default</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">fas</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span> <span class="n">fas</span><span class="o">.</span><span class="n">defaults</span><span class="p">):</span>
+            <span class="c1">#[1:] skips self, the only positional argument</span>
+            <span class="k">if</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+                <span class="n">defaults</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="n">arg</span><span class="p">])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">defaults</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">default</span><span class="p">)</span>
+
+        <span class="n">new_func</span><span class="o">.</span><span class="vm">__defaults__</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">defaults</span><span class="p">)</span>
+
+        <span class="c1"># Bind the new method to the instance</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">eval</span> <span class="o">=</span> <span class="n">types</span><span class="o">.</span><span class="n">MethodType</span><span class="p">(</span><span class="n">new_func</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">defaults</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; The current defaults</span>
+
+<span class="sd">        The current defaults as you would pass them to the eval method.</span>
+
+<span class="sd">        In particular, since all the arguments have to be keyword arguments, it</span>
+<span class="sd">        is a nested set of dictionaries with a key for each argument of the</span>
+<span class="sd">        `eval` methods in the model.</span>
+
+<span class="sd">        &gt;&gt;&gt; model.eval() == model.eval(**model_child.defaults)</span>
+<span class="sd">        True</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">{</span><span class="n">name</span><span class="p">:</span> <span class="n">par</span><span class="o">.</span><span class="n">default</span>
+                <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">par</span> <span class="ow">in</span> <span class="n">inspect</span><span class="o">.</span><span class="n">signature</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">eval</span><span class="p">)</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="c1"># __call__ can&#39;t be rebound, that&#39;s why we use eval</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Model.eval"><a class="viewcode-back" href="../../fgspectra.html#fgspectra.model.Model.eval">[docs]</a>    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">eval</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Evaluation of the model</span>
+
+<span class="sd">        Note</span>
+<span class="sd">        ----</span>
+<span class="sd">        The signature must contain</span>
+
+<span class="sd">        - only keyword arguments (except for ``self``)</span>
+<span class="sd">        - no variadic argument (*args, **kwargs)</span>
+
+<span class="sd">        and</span>
+
+<span class="sd">        - no decoration</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span></div>
+
+    <span class="k">def</span> <span class="nf">_get_repr</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Readable version of defaults</span>
+
+<span class="sd">        In particular, it is also a nested set of dictionaries with a key for</span>
+<span class="sd">        each argument of the `eval` methods in the model.</span>
+
+<span class="sd">        If `eval` calls the `eval` of other classes, you typically want to</span>
+<span class="sd">        call the _get_repr method of those classes and collect the result in</span>
+<span class="sd">        some meaningful dictionary</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">defaults</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">res</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">val</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="k">else</span> <span class="n">val</span>
+        <span class="k">return</span> <span class="p">{</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">:</span> <span class="n">res</span><span class="p">}</span>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># Turns the nested set of dictionaries into a string to be printed</span>
+        <span class="k">return</span> <span class="n">yaml</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_get_repr</span><span class="p">())</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Davide Poletti, Max Abitbol, Zack Li
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
